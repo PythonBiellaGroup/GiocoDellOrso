@@ -58,6 +58,11 @@ https://vallecervobiella.wordpress.com/il-gioco-dellorso/
 
 * Text _- DONE_
 * Graphical with Tkinter _- DONE_
+* Graphical with PyGame _- DONE_
+
+Grazie a Michele Pugno per le serate PyGame.
+Per gli assets grafici grazie a Stefano Gunella e Enrico Battuello.
+Musica "Games Worldbeat" di Bernardo R. from http://freesound.org
 
 ### Game Steps ###
 
