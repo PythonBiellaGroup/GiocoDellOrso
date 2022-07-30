@@ -6,7 +6,8 @@ from board import Board, Game
 from player import AIPlayer
 
 DEFAULT_NO_PLAYER = 'random'
-
+DEFAULT_HUNTER_POSITION = [0, 1, 2]
+DEFAULT_BEAR_POSITION = [20]
 def inizialize_board() -> Board:
     """
     Initialize the board
@@ -27,15 +28,14 @@ def _parse_arguments():
     parser.add_argument('--n_games', type=int, default=100)
     return parser.parse_args()
 
-
 if __name__ == '__main__':
     args = _parse_arguments()
     hunter_player_file = args.hunter_player
     bear_player_file = args.bear_player
     n_games = args.n_games
 
-    hunter_player = AIPlayer('hunter', '1')
-    bear_player = AIPlayer('bear', '2')
+    hunter_player = AIPlayer(DEFAULT_HUNTER_POSITION, 'hunter', '1')
+    bear_player = AIPlayer(DEFAULT_BEAR_POSITION, 'bear', '2')
 
 
     if hunter_player_file != DEFAULT_NO_PLAYER:

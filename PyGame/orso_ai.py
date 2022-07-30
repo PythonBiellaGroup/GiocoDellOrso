@@ -460,10 +460,10 @@ class OrsoPyGame():
                             if (self.gioco_orso.is_hunter_turn()):
                                 self._msg = self.gioco_orso.manage_hunter_selection(self._selezione)
                             else:
-                                if IS_AI_BEAR_PLAYING:
-                                    self._msg = self.gioco_orso.manage_ai_bear_selection()                       
-                                else:
+                                if not IS_AI_BEAR_PLAYING:
                                     self._msg = self.gioco_orso.manage_bear_selection(self._selezione)
+                   
+
             self.clock.tick(60)
             # Disegna la scacchiera
             self.screen.blit(self.BOARD_IMG, (0, 0))
@@ -495,8 +495,13 @@ class OrsoPyGame():
                     self._msg = "Ricominciano i cacciatori"
                 else:
                     self._msg = "Ricomincia l'orso"
-                self.gioco_orso.reset(numero_mosse, inizia_cacciatore)
+                    self.gioco_orso.reset(numero_mosse, inizia_cacciatore)
 
+            
+            if not self.gioco_orso.is_hunter_turn() and IS_AI_BEAR_PLAYING:
+                from time import sleep 
+                sleep(0.5)
+                self._msg = self.gioco_orso.manage_ai_bear_selection()    
 
 # Classi opzioni di menu
 class OpzioneMenu(pygame.sprite.Sprite):

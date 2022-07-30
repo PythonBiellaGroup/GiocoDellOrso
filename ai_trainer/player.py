@@ -12,7 +12,9 @@ class AbstractPlayer:
     """
     Abstract player class
     """
-    def __init__(self, name: str, symbol: str):
+    def __init__(self, positions: list[int], name: str, symbol: str):
+        self._default_positions = positions.copy()
+        self._positions = positions
         self._name = name
         self._symbol = symbol
 
@@ -29,12 +31,11 @@ class AbstractPlayer:
         Get the actions available to the player
         """
         actions = [] 
-        for i in range(board.get_size()):
-            if board[i] == self._symbol:
-                for j in brd.Board.adjacent[i]:
+        for i in range(len(self._positions)):
+            if board[self._positions[i]] == self._symbol:
+                for j in brd.Board.adjacent[self._positions[i]]:
                     if board[j] == board.get_default_char():
-                        actions.append((i, j))
-        
+                        actions.append((self._positions[i], j))
         return actions
 
     def get_action(self, actions: tuple[int, int], board: brd.Board) -> int:
@@ -47,17 +48,43 @@ class AbstractPlayer:
         """
         Reset the player
         """
+        self._positions = self._default_positions.copy()
         return
 
+    def update_position(self, action: tuple[int, int]) -> None:
+        """
+        Update the position of the player
+        """
+
+        for i in range(len(self._positions)):
+            if self._positions[i] == action[0]:
+                self._positions[i] = action[1]
+                break
+
+
+    def move(self, board: brd.Board, action = None) -> tuple[int, int]:
+        """
+        Move the player
+        action is a tuple of (starting_position, target_position)
+        """
+        if action is None:
+            actions = self.get_actions(board)
+            action = self.get_action(actions, board)
+        board[action[1]] = self._symbol
+        board[action[0]] = board.get_default_char()
+        self.update_position(action)
+
+        return action
 class AIPlayer(AbstractPlayer):
     """
     AI player class
     """
     def __init__(self,
+            positions: list[int],
             name: str,
             symbol: str,
             **kwargs):
-        super().__init__(name, symbol)
+        super().__init__(positions, name, symbol)
 
         self.states: list[str] = []  # record all positions taken
         self.exp_rate: float = kwargs['exp_rate'] if kwargs.get('exp_rate') is not None else 0.3
@@ -86,7 +113,7 @@ class AIPlayer(AbstractPlayer):
         else:
             value_max = -INFINITY
             for act in actions:
-                board.move(act)
+                self.move(board, act)
                 state_value = self.states_value.get(board.get_hash())
                 if state_value is None:
                     value = 0
@@ -97,7 +124,7 @@ class AIPlayer(AbstractPlayer):
                     value_max = value
                     action = act
 
-                board.undo_move()
+                self.move(board, (act[1], act[0]))
 
         return action
 
@@ -118,12 +145,14 @@ class AIPlayer(AbstractPlayer):
 
     def reset(self):
         """ Reset the player """
+        super().reset()
         self.states = []
 
 
 class HumanPlayer(AbstractPlayer):
     """
     Human player class
+    TODO: this is not tested yet
     """
 
     def get_action(self, actions: tuple[int, int], board: brd.Board):

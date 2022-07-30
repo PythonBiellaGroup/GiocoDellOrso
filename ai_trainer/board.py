@@ -65,21 +65,6 @@ class Board:
         """ get default character """
         return self._default_char
 
-    def move(self, action: tuple[int, int]) -> None:
-        """ move the board """
-        self._cells[action[1]] = self._cells[action[0]]
-        self._cells[action[0]] = self._default_char
-
-        self._last_action = action
-
-    def undo_move(self) -> None:
-        """
-        Undo the last move
-        """
-        self._cells[self._last_action[0]] = self._cells[self._last_action[1]]
-        self._cells[self._last_action[1]] = self._default_char
-        self._last_action = None
-
 class Game:
     """
     Game abstraction
@@ -131,14 +116,12 @@ class Game:
         """
 
         while True:
-            action = self._player_1.get_action(self._player_1.get_actions(self._board), self._board)
-            self._board.move(action)
+            self._player_1.move(self._board)
             self._player_1.add_state(self._board.get_hash())
             if self.has_ended():
                 break
 
-            action = self._player_2.get_action(self._player_2.get_actions(self._board), self._board)
-            self._board.move(action)
+            self._player_2.move(self._board)
             self._player_2.add_state(self._board.get_hash())
             if self.has_ended():
                 break
