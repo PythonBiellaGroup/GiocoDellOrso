@@ -94,6 +94,8 @@ class Game:
         self._max_turns: int = max_turns
         self._winner: 0 | 1 | 2 = None
 
+    
+
     def has_ended(self) -> bool:
         """
         Check if the game has ended
@@ -139,8 +141,8 @@ class Game:
             self.apply_reward()
             self.reset()
 
-        self._player_1.save_policy()
-        self._player_2.save_policy()
+        self._player_1.save_policy(n_times)
+        self._player_2.save_policy(n_times)
         print("Saved policy")
 
     def apply_reward(self) -> None:
@@ -150,11 +152,11 @@ class Game:
         bear = self._player_1 if self._player_1.get_symbol() == '2' else self._player_2
         hunter = self._player_2 if self._player_1.get_symbol() == '2' else self._player_1
         if self._winner == HUNTER:
-            bear.feed_reward(-5)
-            hunter.feed_reward(100)
+            bear.feed_reward(has_won=False)
+            hunter.feed_reward(has_won=True)
         elif self._winner == BEAR:
-            bear.feed_reward(0)
-            hunter.feed_reward(0)
+            bear.feed_reward(has_won=True)
+            hunter.feed_reward(has_won=False)
 
     def reset(self) -> None:
         """

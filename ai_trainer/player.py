@@ -85,25 +85,51 @@ class AIPlayer(AbstractPlayer):
             symbol: str,
             **kwargs):
         super().__init__(positions, name, symbol)
-
         self.states: list[str] = []  # record all positions taken
         self.exp_rate: float = kwargs['exp_rate'] if kwargs.get('exp_rate') is not None else 0.3
         self.alpha: float = kwargs['alpha'] if kwargs.get('alpha') is not None else 0.2
         self.gamma: float = kwargs['gamma'] if kwargs.get('gamma') is not None else 0.9
         self.states_value: dict[str, int] = {}  # state -> value
 
-    def save_policy(self):
+        self.loss_reward = kwargs['loss_reward'] if kwargs.get('loss_reward') is not None else -1
+        self.win_reward = kwargs['win_reward'] if kwargs.get('win_reward') is not None else 1
+
+        self.old_times_trained = [] 
+        self.old_exp_rate = []
+        self.old_alpha = []
+        self.old_gamma = []
+        self.old_loss_reward = []
+        self.old_win_reward = []
+
+    def save_policy(self, times_trained):
         """
+        TODO: should we save the reward values too???? 
         Save the policy
         """
         curr_time = int(time.time()) 
+        data = dict() 
+        data['states_value'] = self.states_value 
+        data['times_trained'] = self.old_times_trained + [times_trained]
+        data['exp_rate'] = self.old_exp_rate + [self.exp_rate]
+        data['alpha'] = self.old_alpha + [self.alpha]
+        data['gamma'] = self.old_gamma + [self.gamma]
+        data['loss_reward'] = self.old_loss_reward + [self.loss_reward]
+        data['win_reward'] = self.old_win_reward + [self.win_reward]
+
         with open(f'{str(self._name)}_{curr_time}.policy', 'wb') as file_write:
-            pickle.dump(self.states_value, file_write)
+            pickle.dump(data, file_write)
 
     def load_policy(self, file):
         """Load the policy"""
         with open(file, 'rb') as file_read:
-            self.states_value = pickle.load(file_read)
+            data = pickle.load(file_read)
+        self.states_value = data['states_value']
+        self.old_times_trained = data['times_trained']
+        self.old_exp_rate = data['exp_rate']
+        self.old_alpha = data['alpha']
+        self.old_gamma = data['gamma']
+        self.old_loss_reward = data['loss_reward']
+        self.old_win_reward = data['win_reward']
 
     def get_action(self, actions: tuple[int, int], board: brd.Board):
         """ Get the action to be taken """
@@ -134,8 +160,10 @@ class AIPlayer(AbstractPlayer):
         self.states.append(state)
 
     # at the end of game, backpropagate and update states value
-    def feed_reward(self, reward: float):
+    def feed_reward(self, has_won: bool):
         """ Feed the reward to the player """
+        reward = self.win_reward if has_won else self.loss_reward
+
         for state in reversed(self.states):
             if self.states_value.get(state) is None:
                 self.states_value[state] = 0
