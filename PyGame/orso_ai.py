@@ -1,9 +1,11 @@
+from email.mime import base
 from json.encoder import INFINITY
 import pygame
 import time
 import sys
 import functools
 import pickle
+import os 
 # Palette - RGB colors
 BLACK = (0, 0, 0)
 IS_AI_HUNTER_PLAYING = False 
@@ -11,6 +13,11 @@ IS_AI_BEAR_PLAYING = True
 BEAR_WINS = 1
 HUNTER_WINS = 2
 INFINITY = 1000000
+
+try:
+    base_path = sys._MEIPASS
+except AttributeError:
+    base_path = os.path.abspath(".")
 
 class BearGame:
     '''
@@ -61,7 +68,7 @@ class BearGame:
         self._winner = None 
         self._last_move = None
         self._bear_player = Player("orso") 
-        self._bear_player.load_policy("bear_v2.policy")
+        self._bear_player.load_policy(os.path.join(base_path, "bear_v2.policy"))
 
     def get_bear_moves(self) -> int:
         '''
@@ -294,11 +301,11 @@ class BearGame:
 # "lru_cache" decorator saves recent images into memory for fast retrieval.
 @functools.lru_cache()
 def get_img(path):
-    return pygame.image.load(path)
+    return pygame.image.load(os.path.join(base_path, path))
 
 @functools.lru_cache()
 def get_img_alpha(path):
-    return pygame.image.load(path).convert_alpha()
+    return pygame.image.load(os.path.join(base_path, path)).convert_alpha()
 
 class OrsoPyGame():
     # Create the window
@@ -356,7 +363,7 @@ class OrsoPyGame():
         Display main menu with PyGame
         TODO: richiedere opzioni: numero mosse, chi parte
         '''
-        pygame.mixer.music.load('sounds/intro.wav')
+        pygame.mixer.music.load(os.path.join(base_path, 'sounds/intro.wav'))
         pygame.mixer.music.play(-1)
 
         # Elementi di sfondo
@@ -420,7 +427,7 @@ class OrsoPyGame():
 
     def game(self, numero_mosse: int, inizia_cacciatore: bool):
         '''Gioco implementato con PyGame'''
-        pygame.mixer.music.load('sounds/orso_music.ogg')
+        pygame.mixer.music.load(os.path.join(base_path, 'sounds/orso_music.ogg'))
         pygame.mixer.music.play(-1)
         # Inizializza la scacchiera e il gioco
         self.gioco_orso = BearGame(numero_mosse, inizia_cacciatore)
@@ -477,10 +484,12 @@ class OrsoPyGame():
             if self.gioco_orso.game_over():
                 self._msg = self.gioco_orso.get_winner_display()
                 if self.gioco_orso.is_bear_winner():
-                    pygame.mixer.Channel(1).play(pygame.mixer.Sound('sounds/orso_ride.wav'))
+                    pygame.mixer.Channel(1).play(
+                        pygame.mixer.Sound(os.path.join(base_path, 'sounds/orso_ride.wav')))
                     self.screen.blit(self.ORSO_VINCE, (580,380))            
                 else:
-                    pygame.mixer.Channel(1).play(pygame.mixer.Sound('sounds/cacciatori_ridono.wav'))
+                    pygame.mixer.Channel(1).play(pygame.mixer.Sound(
+                        os.path.join(base_path, 'sounds/cacciatori_ridono.wav')))
                     self.screen.blit(self.CACCIATORI_VINCONO, (480,380))            
             # Aggiornamento screen
             pygame.display.update()
@@ -512,7 +521,8 @@ class OpzioneMenu(pygame.sprite.Sprite):
     def __init__(self, opzioni: dict, default_value: object, game: OrsoPyGame, position: tuple):
         super().__init__()
         self.game = game
-        self.LOBSTER_30 = pygame.font.Font('fonts/LobsterTwo-Regular.otf',30)
+        self.LOBSTER_30 = pygame.font.Font(os.path.join(base_path, 
+            'fonts/LobsterTwo-Regular.otf'), 30)
         # Iniziano i cacciatori è il default
         self.value = default_value
         self.opzioni = opzioni
@@ -604,7 +614,7 @@ class HudTurno(pygame.sprite.Sprite):
     def __init__(self, game: OrsoPyGame):
         super().__init__()
         self.game = game
-        self.LOBSTER_45 = pygame.font.Font('fonts/LobsterTwo-Regular.otf',45)
+        self.LOBSTER_45 = pygame.font.Font(os.path.join(base_path, 'fonts/LobsterTwo-Regular.otf'), 45)
 
         self._turno_str = self.LOBSTER_45.render("Turno", 1, BLACK)
 
@@ -631,8 +641,8 @@ class HudMosseOrso(pygame.sprite.Sprite):
     def __init__(self, game: OrsoPyGame):
         super().__init__()
         self.game = game
-        self.LOBSTER_45 = pygame.font.Font('fonts/LobsterTwo-Regular.otf',45)
-        self.LOBSTER_90 = pygame.font.Font('fonts/LobsterTwo-Regular.otf',90)
+        self.LOBSTER_45 = pygame.font.Font(os.path.join(base_path, 'fonts/LobsterTwo-Regular.otf'), 45)
+        self.LOBSTER_90 = pygame.font.Font(os.path.join(base_path, 'fonts/LobsterTwo-Regular.otf'), 90)
         # Pannello mosse orso
         self._mosse_str = self.LOBSTER_45.render("Mosse orso", 1, BLACK)     
             
@@ -648,12 +658,12 @@ class HudMosseOrso(pygame.sprite.Sprite):
 
 class HudMessaggi(pygame.sprite.Sprite):
     '''HUD: pannello per i messaggi'''    
-    PANNELLO_UNO_IMG = get_img('images/buttonLong.png') #panel
+    PANNELLO_UNO_IMG = get_img(os.path.join(base_path, 'images/buttonLong.png')) #panel
 
     def __init__(self, game: OrsoPyGame):
         super().__init__()
         self.game = game
-        self.LOBSTER_30 = pygame.font.Font('fonts/LobsterTwo-Regular.otf',30)
+        self.LOBSTER_30 = pygame.font.Font(os.path.join(base_path, 'fonts/LobsterTwo-Regular.otf'), 30)
 
     def update(self):
         self._text = self.LOBSTER_30.render(self.game._msg, 1, BLACK)
@@ -780,6 +790,9 @@ class Player:
 
 # Main
 if __name__ == "__main__":
+    program_icon = get_img('images/little-bear.png')
+    pygame.display.set_icon(program_icon)
+
     # Il gioco è richiamato da menu
     opg = OrsoPyGame()
     opg.menu()
