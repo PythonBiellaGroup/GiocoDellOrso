@@ -36,7 +36,8 @@ class AbstractPlayer:
                 for j in brd.Board.adjacent[self._positions[i]]:
                     if board[j] == board.get_default_char():
                         actions.append((self._positions[i], j))
-        return actions
+
+        return sorted(actions)
 
     def get_action(self, actions: tuple[int, int], board: brd.Board) -> int:
         """
@@ -100,21 +101,27 @@ class AIPlayer(AbstractPlayer):
         self.old_gamma = []
         self.old_loss_reward = []
         self.old_win_reward = []
+        self.old_opponent = []
 
-    def save_policy(self, times_trained):
-        """
-        TODO: should we save the reward values too???? 
-        Save the policy
-        """
-        curr_time = int(time.time()) 
+    def get_state_info(self, times_trained):
         data = dict() 
-        data['states_value'] = self.states_value 
         data['times_trained'] = self.old_times_trained + [times_trained]
         data['exp_rate'] = self.old_exp_rate + [self.exp_rate]
         data['alpha'] = self.old_alpha + [self.alpha]
         data['gamma'] = self.old_gamma + [self.gamma]
         data['loss_reward'] = self.old_loss_reward + [self.loss_reward]
-        data['win_reward'] = self.old_win_reward + [self.win_reward]
+        data['win_reward'] = self.old_win_reward + [self.win_reward] 
+        return data 
+
+    def save_policy(self, times_trained, opponent):
+        """
+        TODO: should we save the reward values too???? 
+        Save the policy
+        """
+        curr_time = int(time.time())   
+        data = self.get_state_info(times_trained)
+        data['opponent'] = self.old_opponent + [opponent]
+        data['states_value'] = self.states_value 
 
         with open(f'{str(self._name)}_{curr_time}.policy', 'wb') as file_write:
             pickle.dump(data, file_write)
@@ -130,12 +137,12 @@ class AIPlayer(AbstractPlayer):
         self.old_gamma = data['gamma']
         self.old_loss_reward = data['loss_reward']
         self.old_win_reward = data['win_reward']
+        self.old_opponent = data['opponent']
 
     def get_action(self, actions: tuple[int, int], board: brd.Board):
         """ Get the action to be taken """
         if random.uniform(0, 1) <= self.exp_rate:
-            idx = random.randrange(0, len(actions))
-            action = actions[idx]
+            action = random.choice(actions)
         else:
             value_max = -INFINITY
             for act in actions:

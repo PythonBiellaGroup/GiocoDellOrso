@@ -4,6 +4,7 @@ This module handles all the logic to start the game
 import argparse
 from board import Board, Game
 from player import AIPlayer
+import random 
 
 DEFAULT_NO_PLAYER = 'random'
 DEFAULT_HUNTER_POSITION = [0, 1, 2]
@@ -26,6 +27,7 @@ def _parse_arguments():
     parser.add_argument('--hunter_player', type=str, default=DEFAULT_NO_PLAYER)
     parser.add_argument('--bear_player', type=str, default=DEFAULT_NO_PLAYER)
     parser.add_argument('--n_games', type=int, default=100)
+    parser.add_argument('--seed', type=int, default=None)
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -34,8 +36,11 @@ if __name__ == '__main__':
     bear_player_file = args.bear_player
     n_games = args.n_games
 
-    hunter_player = AIPlayer(DEFAULT_HUNTER_POSITION, 'hunter', '1')
-    bear_player = AIPlayer(DEFAULT_BEAR_POSITION, 'bear', '2')
+    if args.seed is not None:
+        random.seed(args.seed)
+
+    hunter_player = AIPlayer(DEFAULT_HUNTER_POSITION, 'hunter', '1', loss_reward=-5, win_reward=100)
+    bear_player = AIPlayer(DEFAULT_BEAR_POSITION, 'bear', '2', loss_reward=-5, win_reward=1)
 
 
     if hunter_player_file != DEFAULT_NO_PLAYER:

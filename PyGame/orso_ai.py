@@ -68,8 +68,6 @@ class BearGame:
         Counter of bear moves
         '''
         return self._bear_moves
-
-
     def get_max_bear_moves(self) -> int:
         '''
         Max bear moves
@@ -499,8 +497,6 @@ class OrsoPyGame():
 
             
             if not self.gioco_orso.is_hunter_turn() and IS_AI_BEAR_PLAYING:
-                from time import sleep 
-                sleep(0.5)
                 self._msg = self.gioco_orso.manage_ai_bear_selection()    
 
 # Classi opzioni di menu
@@ -775,7 +771,8 @@ class Player:
 
     def load_policy(self, file):
         fr = open(file, 'rb')
-        self.states_value = pickle.load(fr)
+        data = pickle.load(fr)
+        self.states_value = data['states_value']
         fr.close()
 
 # Main

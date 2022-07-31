@@ -4,7 +4,6 @@ This module is used as board abstraction for the game.
 HUNTER = 1
 BEAR = 2
 
-
 class Board:
     """
     Board abstraction
@@ -82,7 +81,7 @@ class Game:
                     '_1__2__11____________',
                     '12_11________________']
 
-    def __init__(self, board: Board, player1, player2, max_turns: int = 30):
+    def __init__(self, board: Board, player1, player2, max_turns: int = 300):
         # pylint: disable=locally-disabled, import-outside-toplevel
         from player import AIPlayer
 
@@ -100,35 +99,42 @@ class Game:
         """
         Check if the game has ended
         """
-        return self._board.get_hash() in self.end_states or self._turn >= self._max_turns
+        if self._board.get_hash() in self.end_states:
+            self._winner = HUNTER
+            return True
+        elif self._turn >= self._max_turns:
+            self._winner = BEAR
+            return True
+        else:
+            return False
 
     def get_winner(self) -> int:
         """
         Get the winner of the game
         """
-        if self._board.get_hash() in self.end_states:
-            self._winner = HUNTER
-        else:
-            self._winner = BEAR
         return self._winner
 
     def play(self) -> int:
         """
         Play the game
         """
-
+        
         while True:
             self._player_1.move(self._board)
             self._player_1.add_state(self._board.get_hash())
+            if self._player_1.get_symbol() == '2':
+                self._turn += 1
+
             if self.has_ended():
                 break
 
             self._player_2.move(self._board)
             self._player_2.add_state(self._board.get_hash())
+            if self._player_2.get_symbol() == '2':
+                self._turn += 1
+
             if self.has_ended():
                 break
-
-            self._turn += 1
 
         return self.get_winner()
 
@@ -141,8 +147,8 @@ class Game:
             self.apply_reward()
             self.reset()
 
-        self._player_1.save_policy(n_times)
-        self._player_2.save_policy(n_times)
+        self._player_1.save_policy(n_times, self._player_2.get_state_info(n_times))
+        self._player_2.save_policy(n_times, self._player_1.get_state_info(n_times))
         print("Saved policy")
 
     def apply_reward(self) -> None:
