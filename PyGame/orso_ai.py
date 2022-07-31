@@ -770,10 +770,13 @@ class Player:
         print(f"{self.name}: {board.get_hash()} -> {self.states_value.get(board.get_hash())}")
 
     def load_policy(self, file):
-        fr = open(file, 'rb')
-        data = pickle.load(fr)
-        self.states_value = data['states_value']
-        fr.close()
+        with open(file, 'rb') as file_read:
+            data = pickle.load(file_read)
+
+        self.states_value = (
+            data if 'states_value' not in data else  # data legacy support
+            data['states_value']
+        )
 
 # Main
 if __name__ == "__main__":
