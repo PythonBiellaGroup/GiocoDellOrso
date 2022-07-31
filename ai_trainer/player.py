@@ -8,10 +8,12 @@ import board as brd
 
 INFINITY = 1000000
 
+
 class AbstractPlayer:
     """
     Abstract player class
     """
+
     def __init__(self, positions: list[int], name: str, symbol: str):
         self._default_positions = positions.copy()
         self._positions = positions
@@ -30,7 +32,8 @@ class AbstractPlayer:
         """
         Get the actions available to the player
         """
-        actions = [] 
+
+        actions = []
         for i in range(len(self._positions)):
             if board[self._positions[i]] == self._symbol:
                 for j in brd.Board.adjacent[self._positions[i]]:
@@ -62,8 +65,7 @@ class AbstractPlayer:
                 self._positions[i] = action[1]
                 break
 
-
-    def move(self, board: brd.Board, action = None) -> tuple[int, int]:
+    def move(self, board: brd.Board, action=None) -> tuple[int, int]:
         """
         Move the player
         action is a tuple of (starting_position, target_position)
@@ -76,26 +78,42 @@ class AbstractPlayer:
         self.update_position(action)
 
         return action
+
+
 class AIPlayer(AbstractPlayer):
     """
     AI player class
     """
+
     def __init__(self,
-            positions: list[int],
-            name: str,
-            symbol: str,
-            **kwargs):
+                 positions: list[int],
+                 name: str,
+                 symbol: str,
+                 **kwargs):
         super().__init__(positions, name, symbol)
         self.states: list[str] = []  # record all positions taken
-        self.exp_rate: float = kwargs['exp_rate'] if kwargs.get('exp_rate') is not None else 0.3
-        self.alpha: float = kwargs['alpha'] if kwargs.get('alpha') is not None else 0.2
-        self.gamma: float = kwargs['gamma'] if kwargs.get('gamma') is not None else 0.9
+        self.exp_rate: float = (
+            kwargs['exp_rate'] if kwargs.get('exp_rate') is not None else
+            0.3
+        )
+        self.alpha: float = (
+            kwargs['alpha'] if kwargs.get('alpha') is not None else 0.2
+        )
+        self.gamma: float = (
+            kwargs['gamma'] if kwargs.get('gamma') is not None else 0.9
+        )
         self.states_value: dict[str, int] = {}  # state -> value
 
-        self.loss_reward = kwargs['loss_reward'] if kwargs.get('loss_reward') is not None else -1
-        self.win_reward = kwargs['win_reward'] if kwargs.get('win_reward') is not None else 1
+        self.loss_reward = (
+            kwargs['loss_reward'] if kwargs.get('loss_reward') is not None else
+            -1
+        )
+        self.win_reward = (
+            kwargs['win_reward'] if kwargs.get('win_reward') is not None else
+            1
+        )
 
-        self.old_times_trained = [] 
+        self.old_times_trained = []
         self.old_exp_rate = []
         self.old_alpha = []
         self.old_gamma = []
@@ -104,24 +122,25 @@ class AIPlayer(AbstractPlayer):
         self.old_opponent = []
 
     def get_state_info(self, times_trained):
-        data = dict() 
+        data = dict()
         data['times_trained'] = self.old_times_trained + [times_trained]
         data['exp_rate'] = self.old_exp_rate + [self.exp_rate]
         data['alpha'] = self.old_alpha + [self.alpha]
         data['gamma'] = self.old_gamma + [self.gamma]
         data['loss_reward'] = self.old_loss_reward + [self.loss_reward]
-        data['win_reward'] = self.old_win_reward + [self.win_reward] 
-        return data 
+        data['win_reward'] = self.old_win_reward + [self.win_reward]
+
+        return data
 
     def save_policy(self, times_trained, opponent):
         """
-        TODO: should we save the reward values too???? 
         Save the policy
         """
-        curr_time = int(time.time())   
+
+        curr_time = int(time.time())
         data = self.get_state_info(times_trained)
         data['opponent'] = self.old_opponent + [opponent]
-        data['states_value'] = self.states_value 
+        data['states_value'] = self.states_value
 
         with open(f'{str(self._name)}_{curr_time}.policy', 'wb') as file_write:
             pickle.dump(data, file_write)
@@ -174,8 +193,9 @@ class AIPlayer(AbstractPlayer):
         for state in reversed(self.states):
             if self.states_value.get(state) is None:
                 self.states_value[state] = 0
-            self.states_value[state] += self.alpha * (self.gamma * reward -
-                self.states_value[state])
+            self.states_value[state] += self.alpha * (
+                self.gamma * reward - self.states_value[state]
+            )
             reward = self.states_value[state]
 
     def reset(self):
@@ -187,7 +207,6 @@ class AIPlayer(AbstractPlayer):
 class HumanPlayer(AbstractPlayer):
     """
     Human player class
-    TODO: this is not tested yet
     """
 
     def get_action(self, actions: tuple[int, int], board: brd.Board):

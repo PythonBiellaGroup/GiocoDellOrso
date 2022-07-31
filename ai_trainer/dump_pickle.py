@@ -1,28 +1,41 @@
-import argparse 
+import argparse
 import pickle
 
-parser = argparse.ArgumentParser() 
+
+parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--input', help='input file', required=True)
-parser.add_argument('-d', '--dump', type=bool, help='dump the state', default=False)
-parser.add_argument('--reverse', type=bool, help='reverse the input file', default=False)
-parser.add_argument('--state', help='display valueof the state', default = '')
+parser.add_argument(
+    '-d', '--dump',
+    type=bool,
+    help='dump the state', default=False
+)
+parser.add_argument(
+    '--reverse',
+    type=bool,
+    help='reverse the input file',
+    default=False
+)
+parser.add_argument('--state', help='display valueof the state', default='')
 
 args = parser.parse_args()
-input = args.input 
-state = args.state 
-with open(input, 'rb') as f: 
+input = args.input
+state = args.state
+with open(input, 'rb') as f:
     data: dict[str, float] = pickle.load(f)
-    # sort my data dict by value 
-
 
     states = data['states_value'].copy()
-    data['states_value'] = None 
+    data['states_value'] = None
 
-    print(data) 
+    print(data)
     if state == '' and args.dump:
-        states = {k: v for k, v in sorted(states.items(), key=lambda item: item[1], reverse = args.reverse)}
-        for key, value in states.items(): 
+        states = {
+            k: v for k, v in sorted(
+                states.items(), key=lambda item: item[1],
+                reverse=args.reverse
+            )
+        }
+        for key, value in states.items():
             print(key, value)
-    else: 
+    else:
         print("the value of the state is:")
         print(f"{state}: {data[state]}")
