@@ -79,7 +79,11 @@ class AbstractPlayer:
 
         return action
 
-
+    def add_state(self, state: str) -> None:
+        """
+        Add the state to the player
+        """
+        pass # abstract method
 class AIPlayer(AbstractPlayer):
     """
     AI player class

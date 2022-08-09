@@ -1,6 +1,10 @@
 """
 This module is used as board abstraction for the game.
 """
+
+from board_fwd import Board # forward declaration of the board to solve circular imports
+from player import AbstractPlayer
+
 HUNTER = 1
 BEAR = 2
 
@@ -95,14 +99,15 @@ class Game:
                   '_1__2__11____________',
                   '12_11________________']
 
-    def __init__(self, board: Board, player1, player2, max_turns: int = 300):
-        # pylint: disable=locally-disabled, import-outside-toplevel
-        from player import AIPlayer
-
+    def __init__(self, 
+            board: Board, 
+            player1: AbstractPlayer, 
+            player2: AbstractPlayer, 
+            max_turns: int = 300):
         self._default_cells = board._cells.copy()
         self._board = board
-        self._player_1: AIPlayer = player1
-        self._player_2: AIPlayer = player2
+        self._player_1: AbstractPlayer = player1
+        self._player_2: AbstractPlayer = player2
         self._turn: int = 0
         self._max_turns: int = max_turns
         self._winner: 0 | 1 | 2 = None
@@ -126,27 +131,46 @@ class Game:
         """
         return self._winner
 
-    def play(self) -> int:
+    def print_winner(self) -> None:
+        """
+        Print the winner of the game
+        """
+        if not self.has_ended():
+            print("The game has not ended yet")
+            return
+
+        if self._winner == HUNTER:
+            print("The hunter won!")
+        elif self._winner == BEAR:
+            print("The bear won!")
+
+    def switch_players(self, curr_player: AbstractPlayer) -> AbstractPlayer:
+        """
+        Switch players
+        """
+        if curr_player is self._player_1:
+            return self._player_2
+        else:
+            return self._player_1
+
+    def play(self, show_board: bool = False) -> int:
         """
         Play the game
         """
-
+        curr_player = self._player_1
         while True:
-            self._player_1.move(self._board)
-            self._player_1.add_state(self._board.get_hash())
-            if self._player_1.get_symbol() == '2':
+            if show_board:
+                self._board.display()
+
+            curr_player.move(self._board)
+            curr_player.add_state(self._board.get_hash())
+            if curr_player.get_symbol() == '2':
                 self._turn += 1
 
             if self.has_ended():
                 break
-
-            self._player_2.move(self._board)
-            self._player_2.add_state(self._board.get_hash())
-            if self._player_2.get_symbol() == '2':
-                self._turn += 1
-
-            if self.has_ended():
-                break
+                
+            curr_player = self.switch_players(curr_player)
 
         return self.get_winner()
 
