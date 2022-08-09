@@ -65,6 +65,18 @@ class Board:
         """ get default character """
         return self._default_char
 
+    def display(self):
+        print("            "+self._cells[0]+"            ","             "+"0"+"            ")
+        print("        "+self._cells[1]+"       "+self._cells[2]+"        ","         "+"1"+"       "+"2"+"        ")
+        print("            "+self._cells[3]+"            ","             "+"3"+"            ")
+        print("  "+self._cells[4]+"         "+self._cells[5]+"         "+self._cells[6]+"  ","   "+"4"+"         "+"5"+"         "+"6"+"  ")
+        print(""+self._cells[7]+"   "+self._cells[8]+"   "+self._cells[9]+"   "+self._cells[10]+"   "+self._cells[11]+"   "+self._cells[12]+"   "+self._cells[13]+"",
+              " "+"7"+"   "+"8"+"   "+"9"+"  "+"10"+"  "+"11"+"  "+"12"+"  "+"13"+"")
+        print("  "+self._cells[14]+"         "+self._cells[15]+"         "+self._cells[16]+"  ","  "+"14"+"        "+"15"+"        "+"16"+"")
+        print("            "+self._cells[17]+"            ","            "+"17"+"            ")
+        print("        "+self._cells[18]+"       "+self._cells[19]+"        ","        "+"18"+"      "+"19"+"        ")
+        print("            "+self._cells[20]+"            ","            "+"20"+"            ")
+
 
 class Game:
     """

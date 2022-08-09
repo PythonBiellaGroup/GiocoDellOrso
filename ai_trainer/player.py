@@ -213,7 +213,9 @@ class HumanPlayer(AbstractPlayer):
         """ Get the action to be taken """
         while True:
             try:
-                action = int(input('Enter your action: '))
+                start = int(input('Enter the starting position: '))
+                target = int(input('Enter the target position: '))
+                action = (start, target) 
                 if action in actions:
                     return action
                 else:

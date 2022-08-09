@@ -1,6 +1,8 @@
 from email.mime import base
+from email.policy import default
 from json.encoder import INFINITY
 import pygame
+import argparse
 import time
 import sys
 import functools
@@ -8,8 +10,7 @@ import pickle
 import os 
 # Palette - RGB colors
 BLACK = (0, 0, 0)
-IS_AI_HUNTER_PLAYING = False 
-IS_AI_BEAR_PLAYING = True
+IS_AI_BEAR_PLAYING = None
 BEAR_WINS = 1
 HUNTER_WINS = 2
 INFINITY = 1000000
@@ -788,10 +789,23 @@ class Player:
             data['states_value']
         )
 
+def set_global():
+    global IS_AI_BEAR_PLAYING 
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--ai', 
+        action='store_true', 
+        help='setta la flag se vuoi giocare con BEAR AI', 
+        default=False)
+
+    args = parser.parse_args()
+    IS_AI_BEAR_PLAYING = args.ai
+
 # Main
 if __name__ == "__main__":
     program_icon = get_img('images/little-bear.png')
     pygame.display.set_icon(program_icon)
+
+    set_global()
 
     # Il gioco è richiamato da menu
     opg = OrsoPyGame()
